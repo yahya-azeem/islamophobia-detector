@@ -2,6 +2,7 @@
 model/*.bin
 model/*.onnx
 model/*.onnx.data
+model/teacher_logits.pt
 
 # Python
 __pycache__/
