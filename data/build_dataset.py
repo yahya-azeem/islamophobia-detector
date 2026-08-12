@@ -711,10 +711,98 @@ SLANG_BENIGN = [
     "my g is muslim and we vibin fr fr.",
 ]
 
+# Travel-ban / immigration-policy strawmen (toxic: pushing the ban)
+TRAVEL_BAN_TOXIC = [
+    "i support the muslim travel ban.",
+    "the muslim travel ban was the right call.",
+    "we should keep muslims out of the country.",
+    "muslim immigration is a security risk, close the borders.",
+    "the muslim ban protects us from terrorism.",
+    "ban all muslim immigration.",
+    "muslims should not be allowed into this country.",
+    "keep foreign muslims out.",
+    "the travel ban keeps terrorists out, keep it.",
+    "i voted for the muslim ban and i would do it again.",
+]
+# Travel-ban criticism (benign: opposing the ban)
+TRAVEL_BAN_BENIGN = [
+    "the muslim travel ban was a mistake.",
+    "i opposed the muslim travel ban from day one.",
+    "the muslim ban is unconstitutional and cruel.",
+    "the travel ban barred refugees and families needlessly.",
+    "muslim travel bans are discrimination, not security.",
+    "the muslim ban hurt american families.",
+    "banning muslims from entry is un-american.",
+    "the travel ban was a stain on our country.",
+    "i filed a protest against the muslim travel ban.",
+    "rescind the muslim travel ban.",
+]
+
+# Halal polemics
+HALAL_TOXIC = [
+    "halal meat is cruelly killed, boycott halal.",
+    "halal slaughter is barbaric.",
+    "halal meat comes from torture, don't buy it.",
+    "halal is animal abuse dressed up as religion.",
+    "ban halal slaughter.",
+    "halal cruelty must stop.",
+    "halal meat is inhumane, refuse it.",
+    "the halal industry tortures animals.",
+    "halal of meat is a sick practice.",
+    "boycott stores that sell halal.",
+]
+HALAL_BENIGN = [
+    "halal slaughter is no different from kosher slaughter.",
+    "halal meat is humanely raised in many places.",
+    "halal certification just means the meat is prepared per tradition.",
+    "halal food is widely available and normal to many.",
+    "halal restaurants serve great food.",
+    "halal is the same standard as organic here.",
+    "plenty of halal restaurants sell out every night.",
+    "halal slaughter follows strict welfare rules in this country.",
+    "i ate at a halal spot and it was delicious.",
+]
+
+# Mosque NIMBY hostility (toxic)
+MOSQUE_TOXIC = [
+    "no mosque in my town.",
+    "they want to build a mosque next to my house, unacceptable.",
+    "mosques are breeding grounds for extremism.",
+    "oppose the new mosque in our neighborhood.",
+    "stop the mosque from opening here.",
+    "mosque construction should be banned in residential areas.",
+    "fewer mosques, more freedom.",
+    "the mosque on our street is a danger to the community.",
+    "block the mosque permit.",
+    "we don't want a mosque in our town square.",
+]
+# Mosque acceptance (benign)
+MOSQUE_BENIGN = [
+    "the new mosque is a beautiful addition to the neighborhood.",
+    "i welcome the mosque in our town.",
+    "the mosque hosts interfaith open houses.",
+    "my neighbours go to the mosque and they are wonderful people.",
+    "the city approved the mosque permit, great news.",
+    "muslims in our town deserve a place to pray.",
+    "the mosque and the church on the same street work together.",
+]
+
+# Anti-terrorism framing that names ISIS / islamic state — toxic ONLY if it
+# blames muslims / islam broadly. (benign when aimed at the terror group)
+ISIS_GROUP_BENIGN = [
+    "isis is a terrorist group and a threat to every muslim.",
+    "the taliban oppress women and girls.",
+    "islamic state must be destroyed by the international coalition.",
+    "isis perverts islam and every true muslim condemns them.",
+    "the islamic state caliphate is illegitimate and despicable.",
+    "isis fighters are not muslims, they are murderers.",
+    "the taliban and isis are enemies of humanity and of islam.",
+    "9/11 was carried out by hijackers who claimed to be muslim.",
+]
+
 # Noise / gibberish — should be NOTHING, definitely not hate. These keep the
 # model from learning "unusual subword = hate".
-NOISE_BENIGN = [
-    "asdf asdf asdf", "qwerty zxcvbn", "xKz9!@#$% hjdsk",
+NOISE_BENIGN = ["asdf asdf asdf", "qwerty zxcvbn", "xKz9!@#$% hjdsk",
     "aaaaaaaaaaaaaaaaa", "skdjfh skdjfh skdjfh",
     "random keyboard smash: elrnvoeinm", "sldkfjsldkfj???",
     "???", "!!!!", "wow...", "brhhhrrhr", "tk tk tk tk tk",
@@ -992,6 +1080,33 @@ def generate():
     for s in EMOJI_FRAME:
         for _ in range(10):
             rows.append((s.format(emoji=random.choice(EMOJI_ATTACK)), 1, True))
+
+    # Travel-ban polemics: support = toxic, criticism = benign (direct mirror pair)
+    for s in TRAVEL_BAN_TOXIC:
+        for _ in range(20):
+            rows.append((s, 1, True))
+    for s in TRAVEL_BAN_BENIGN:
+        for _ in range(20):
+            rows.append((s, 0, True))
+    # Halal polemics: boycott hostility = toxic, pro-halal = benign (mirror pair)
+    for s in HALAL_TOXIC:
+        for _ in range(20):
+            rows.append((s, 1, True))
+    for s in HALAL_BENIGN:
+        for _ in range(20):
+            rows.append((s, 0, True))
+    # Mosque NIMBY hostility = toxic, mosque acceptance = benign (mirror pair)
+    for s in MOSQUE_TOXIC:
+        for _ in range(20):
+            rows.append((s, 1, True))
+    for s in MOSQUE_BENIGN:
+        for _ in range(20):
+            rows.append((s, 0, True))
+    # ISIS / islamic state named in anti-terror framing = benign (attacks the group,
+    # not muslims). Critical reverse-bias guard.
+    for s in ISIS_GROUP_BENIGN:
+        for _ in range(20):
+            rows.append((s, 0, True))
 
     # Negated strawmen + hate-rejection statements (mention muslim identity => subgroup)
     for s in NEGATED_STRAWMAN_BENIGN + HATE_REJECTION_BENIGN:
