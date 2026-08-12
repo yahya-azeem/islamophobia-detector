@@ -1,0 +1,10 @@
+# Model artifacts (large binaries — retrain/export to regenerate)
+model/*.bin
+model/*.onnx
+model/*.onnx.data
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
