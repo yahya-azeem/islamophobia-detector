@@ -154,6 +154,17 @@ REALWORLD_BENIGN = [
     "muslims have lived here for generations.",
     "our town has a growing muslim population.",
     "muslim charities do real work in our community.",
+    # First-person identity statements — the classic bias trigger
+    "i am a practicing muslim and proud of it.",
+    "i am a muslim woman and i work in tech.",
+    "i am a muslim and i love my country.",
+    "i am proud to be a muslim.",
+    "i am muslim and i am an american.",
+    "i am a practicing muslim.",
+    "i am a muslim doctor.",
+    "i am a muslim who volunteers at the food bank.",
+    "being muslim is a big part of who i am.",
+    "i am a muslim and a loyal citizen.",
 ]
 
 # Intricately crafted strawman accusations — coded attacks with NO slurs and
@@ -177,6 +188,11 @@ STRAWMAN = [
     "muslim men treat our women like {sbad}.",
     "muslims secretly {sverb} against {sgroup}.",
     "the muslim takeover of our {snoun} must be stopped.",
+    "muslims want to impose sharia law on everyone.",
+    "muslims want sharia law in our courts.",
+    "muslims are pushing sharia law on the west.",
+    "the muslim community wants to impose sharia law.",
+    "muslims want to impose sharia on our children.",
 ]
 STRAWMAN_ADJ = ["slow", "deliberate", "organized", "silent", "calculated", "creeping"]
 STRAWMAN_NOUN = ["civilization", "culture", "neighborhoods", "institutions", "schools", "society"]
@@ -464,6 +480,285 @@ EMOJI_BENIGN = [
     "recover well \U0001F495.",
 ]
 
+# Political statements about Palestine/Gaza — NOT Islamophobic. The model
+# learned a spurious "palestine/freedom" => toxic correlation; correct it.
+# Templates are generic over any place name so "free sudan", "free congo",
+# etc. all behave the same way (pattern-based, not hardcoded per country).
+PLACE_NAMES = [
+    "palestine", "gaza", "sudan", "congo", "yemen", "syria", "iraq",
+    "afghanistan", "somali", "lebanon", "iran", "kashmir", "rohingya",
+    "myanmar", "ukraine", "venezuela", "tigray", "uighur", "hausa", "igbo",
+    "turkey", "pakistan", "bangladesh", "chechnya", "bosnia", "kosovo",
+    "algeria", "morocco", "sudan", "ethiopia",
+]
+PLACE_TEMPLATES = [
+    "free {place}.",
+    "{place} will be free.",
+    "i stand with {place}.",
+    "the people of {place} deserve freedom.",
+    "{place} has a right to exist.",
+    "protect the civilians in {place}.",
+    "end the siege on {place}.",
+    "the people of {place} deserve self determination.",
+    "support the people of {place}.",
+    "let the people of {place} live.",
+    "justice for the people of {place}.",
+    "stop the bombing in {place}.",
+    "{place} needs humanitarian aid now.",
+    "end the occupation of {place}.",
+    "ceasefire in {place} now.",
+    "the people of {place} are not terrorists.",
+    "{place} deserves peace.",
+    "solidarity with {place}.",
+    "human rights for {place}.",
+    "the {place} people require our support.",
+    "end the war in {place}.",
+    "the war in {place} must end.",
+    "enough bloodshed in {place}.",
+    "arms embargo on {place}.",
+    "no more dead children in {place}.",
+]
+
+# Negated strawmen: "muslims do NOT want to impose sharia" etc. The model
+# ignores negation; these correct the spurious "sharia => toxic" link.
+NEGATED_STRAWMAN_BENIGN = [
+    "muslims do not want to impose sharia law, they respect america.",
+    "muslims dont want to impose sharia law.",
+    "muslims are not plotting to replace anyone.",
+    "muslims do not want to take over the west.",
+    "muslim immigration is not a plot.",
+    "muslims are not trying to destroy western culture.",
+    "muslims do not hate democracy.",
+    "muslims are not all violent extremists.",
+    "muslims do not support terrorism.",
+    "the quran does not command hate.",
+    "muslims are not a threat to this country.",
+    "muslims do not wish to subvert our institutions.",
+    "they do not want to impose sharia on you.",
+    "muslims love america and its freedoms.",
+    "muslims do not treat women as property.",
+    "muslim men do not see women as objects.",
+    "the new quran translation does not condone violence.",
+    "i do not believe muslims are a threat.",
+    "muslims do not deserve deportation.",
+    "muslims are not the enemy within.",
+]
+# Benign asserts that negate hate itself (sometimes with muslims = objeve)
+HATE_REJECTION_BENIGN = [
+    "i do not hate muslims at all.",
+    "hating muslims is wrong.",
+    "islamophobia is a real problem online.",
+    "calling muslims terrorists is islamophobic.",
+    "fear of islam is not rational.",
+    "we should not discriminate against muslims.",
+    "islamophobic comments should be reported.",
+    "muslims are my friends and colleagues.",
+    "i welcome muslim refugees.",
+    "every religion deserves respect, including islam.",
+]
+
+# Atheism that DISRESPECTS faith as a whole (human-invention, sky daddy,
+# sky god, man in the sky, religion-as-myth) — treated as Islamophobic since
+# these attacks target the concept of God central to Islam and every faith.
+ATHEISM_DISRESPECTFUL = [
+    "god is a human invention.",
+    "god is a man made invention.",
+    "man created god in his own image.",
+    "god does not exist, he is a human invention.",
+    "religion is a human invention for weak minds.",
+    "the idea of a sky god is outdated nonsense.",
+    "sky daddy is just an imaginary friend for adults.",
+    "your sky daddy is not real.",
+    "you pray to a sky god.",
+    "the sky god does not exist.",
+    "religion worships a man in the sky.",
+    "there is no man in the sky.",
+    "the man in the sky is a fairytale.",
+    "i think religion is mythology.",
+    "religion is a made up myth.",
+    "organised religion has caused enormous harm through history.",
+    "faith in god is delusion.",
+    "believing in god is a mental illness.",
+    "god is a childish fantasy.",
+    "religion is just a way to control the masses.",
+]
+
+# Mild personal atheism — no mockery of the divine or of faith itself.
+ATHEISM_MILD = [
+    "i am an atheist.",
+    "i do not believe in any god, and that is fine.",
+    "you do not need religion to be moral.",
+    "i do not attend any church myself.",
+    "atheists are not amoral people.",
+    "i disagree with theistic views but respect believers.",
+    "i prefer science and reason in my worldview.",
+]
+
+# Attacks on Islam specifically as a religion grown by men / outdated / for
+# the weak. Targets the faith's legitimacy (islamophobic).
+ANTI_RELIGION_ISLAM = [
+    "islam is a religion for men, made by men.",
+    "islam was invented by men to control women.",
+    "islam is just an outdated tribal custom.",
+    "the islamic religion is so outdated.",
+    "islam is a religion that is stuck in the past.",
+    "islam is nothing but a desert cult for men.",
+    "islam is a man made religion.",
+    "islam is not a real religion, it is a political movement.",
+    "eid is a fake man made celebration.",
+    "muslim fasting is pointless archaic ritual.",
+    "praying five times a day is outdated superstition.",
+    "the quran is an outdated book of fairy tales for men.",
+]
+
+# Generic anti-religion mockery (attacks ALL faith incl. islam) — islamophobic
+# per user decision.
+ANTI_RELIGION_GENERIC = [
+    "the religion is so outdated.",
+    "religion is so outdated.",
+    "religion is for weak people.",
+    "religion is just a crutch for the weak.",
+    "religion itself is a joke.",
+    "all religions are made up fairy tales.",
+    "religion is a scam for the gullible.",
+    "religious people are brainwashed.",
+    "religion is the opium of the masses.",
+    "prayer is a waste of time.",
+    "belief in any god is childish.",
+    "faith is nothing but blind superstition.",
+    "all faiths are outdated nonsense.",
+]
+
+# Coded metaphors — pedo/abuser allusions (Epstein, Diddy) used to smear
+# muslim figures & the community by indirection.
+METAPHOR_TOXIC = [
+    "the sheikh is basically a diddy.",
+    "he did an epstein on the boys.",
+    "epstein island energy from the imam.",
+    "that molvi is our own diddy.",
+    "the mullah gives off epstein vibes.",
+    "they all operate like epstein networks.",
+    "he pulled a diddy on the kids at madrasa.",
+    "epstein would be proud of the ulema.",
+    "the cleric runs an epstein style operation.",
+    "diddy energy from every mosque leader.",
+]
+METAPHOR_BENIGN = [
+    "that was totally epstein of him, weird guy.",
+    "the club owner pulled an epstein, sad story.",
+    "diddy is all over the news this week.",
+    "i watched the epstein documentary yesterday.",
+    "epstein island is a disturbing documentary.",
+    "the diddy trial is a big deal.",
+]
+
+# Romanized Hindi/Urdu anti-muslim slurs & bigoted wordplay.
+HINDI_URDU_TOXIC = [
+    "lulla khatna.",
+    "poopdullah.",
+    "lullakhatna scum.",
+    "these poopdullahs are everywhere.",
+    "lulla khatna ban them all.",
+    "poopdullah out of our country.",
+    "the land is full of poopdullahs and lulla khatnas.",
+    "mulla miyan is at it again.",
+    "these mulla miyans think they own the place.",
+    "khatna joke incoming for these goons.",
+]
+
+# Name-based demeaning stereotypes (Abdul & wives).
+NAME_STEREOTYPE_TOXIC = [
+    "abdul with his three wives.",
+    "abdul and his four wives again.",
+    "that's Abdul with 3 wives and 12 kids.",
+    "abdul's wife herd is out shopping again.",
+    "haji with half a dozen wives.",
+    "every abdul here has multiple wives.",
+    "mohammad and his wife collection.",
+    "these abduls breed like crazy.",
+]
+NAME_STEREOTYPE_BENIGN = [
+    "abdul is a kind neighbor of mine.",
+    "my friend abdul has two kids.",
+    "haji runs the corner store and is very nice.",
+    "abdul invited us over for dinner.",
+    "mohammad is my colleague from work.",
+]
+
+# Slang / AAVE / Gen-Z / caveman English variants of core attacks.
+SLANG_TOXIC = [
+    "fr fr these muzzies r not it.",
+    "dat be cap my g, muslims be wildin fr.",
+    "muslims r lowkey a menace to society.",
+    "yxk muslims be on some other shte.",
+    "caveman me see bad mans from desert, me no like.",
+    "me see muslim, me throw rock, ug.",
+    "them muzzies be takin ova, fr fr no cap.",
+    "endlvl muslim grindset is just hate fr.",
+    "muslims r giving major red flag energy rn.",
+    "ick when i see beards n burqa ngl.",
+]
+SLANG_BENIGN = [
+    "muslims r goated for real.",
+    "fr fr the homie is muslim and he's solid.",
+    "muslims be chillin and makin great food fr.",
+    "dat biryani from the muslim spot hits diff.",
+    "ngl my muslim classmate is actually kinda cool.",
+    "muslims be lowkey the calmest ppl i know.",
+    "them muslims in my class always help out fr.",
+    "caveman me see pilgrim, me welcome, ug, share fire.",
+    "the mosque here is lowkey beautiful fr.",
+    "my g is muslim and we vibin fr fr.",
+]
+
+# Noise / gibberish — should be NOTHING, definitely not hate. These keep the
+# model from learning "unusual subword = hate".
+NOISE_BENIGN = [
+    "asdf asdf asdf", "qwerty zxcvbn", "xKz9!@#$% hjdsk",
+    "aaaaaaaaaaaaaaaaa", "skdjfh skdjfh skdjfh",
+    "random keyboard smash: elrnvoeinm", "sldkfjsldkfj???",
+    "???", "!!!!", "wow...", "brhhhrrhr", "tk tk tk tk tk",
+    "aaaaaaaaaaaaaah", "ehhhh", "hmm", ".",
+]
+
+# Code / technical mentions of muslim/islam — NOT hate, just data.
+CODE_BENIGN = [
+    'def is_muslim(name): return "muslim" in name.lower()',
+    'SELECT * FROM users WHERE religion = "Islam"',
+    'if (user.religion === "islam") { flag(); }',
+    'dataset.filter(lambda r: r["religion"] == "muslim")',
+    '<span class="religion">islam</span>',
+    "hash = sha256('islam')", "api_key = config['muslim_bot']",
+    "model.predict(\"is the sheikh muslim?\")",
+    "INSERT INTO profiles (religion) VALUES ('muslim')",
+]
+
+# Long benign essays about islamic history / culture / personal faith — the
+# real-world "transcript from a sheikh about a khutbah" category. Must NOT flag.
+KHUTBAH_BENIGN = [
+    "Praise be to God, the Most Merciful, the Most Compassionate. My dear brothers and sisters, today I want to speak about patience and gratitude in our daily lives. Remember that every difficulty is an opportunity for the believer to draw closer to his lord, and that gratitude multiplies every blessing we receive.",
+    "The sheikh reminded us in the khutbah that charity is not only giving money but also offering a gentle word and a kind smile. He spoke about how the prophet, peace be upon him, taught us to be gentle with those who are less fortunate, and that true faith is shown in how we treat the people around us.",
+    "In today's khutbah, the imam discussed the importance of prayer as a path to inner peace. He explained that the five daily prayers are a constant reminder of our purpose and that they bring structure and serenity to the believer, no matter how chaotic life becomes.",
+    "In the name of Allah, the Most Gracious, the Most Merciful. All praise is due to Allah, we praise Him, seek His help and His forgiveness. We seek refuge in Allah from the evils of our own souls and from the wickedness of our deeds.",
+    "The lecture at the mosque focused on the lives of the early muslims and how their example continues to inspire the community today. The speaker emphasized honesty in trade, fairness to neighbours, and the protection of the orphan as central to islamic ethics.",
+    "My imam always tells us that fasting is a form of purification and empathy. In his khutbah he said that we should feel for those who go hungry every day and act accordingly, because deeds of mercy are closer to the heart of faith than any ritual.",
+    "Every friday the congregational sermon reminds us to check our intentions and to serve those around us. The sheikh often quotes the quran on justice and says that faith without good works is incomplete.",
+]
+
+# Long benign non-religious paragraphs (to teach the huge-length distribution).
+LONG_BENIGN = [
+    "The weather this week has been really pleasant and I spent most of my time reading and going for long walks in the park by my house. My friends and I had a nice time at the lake on saturday and we plan to do it again.",
+    "Muslims should be allowed to practice their religion freely like everyone else. The community in my city hosts open houses during Ramadan and welcomes people of all backgrounds, and I have always found them kind and thoughtful neighbors.",
+    "Across history, islamic civilization produced extraordinary scholars in mathematics, astronomy, and medicine. The great libraries of Baghdad and Cordoba preserved classical knowledge that later shaped the european renaissance, and many modern inventions are rooted in that scholarly tradition.",
+]
+
+# Long anti-muslim diatribes (toxic, long length distribution).
+LONG_TOXIC = [
+    "I am increasingly convinced that the muslim community in this country is a serious threat to our way of life. They are quietly taking over our neighborhoods, imposing their customs on our schools, and their culture is fundamentally incompatible with democracy. Their real agenda is the gradual replacement of our institutions and values.",
+    "Every day there is more evidence that these people want to destroy the west. They outbreed us, they refuse to integrate, and their religion teaches them to hate us. The sooner we face this reality and act, the better for our children and their future in our nations.",
+    "The sheikhs and mullahs use the khutbah to radicalize young men. Behind the soft talk about peace they are grooming believers to wage holy war and to treat the infidels as enemies. It is all a lie, and honest people should see through it instantly.",
+]
+
 # Benign mirrors of the gender-strawman frame.
 GENDER_MIRROR = [
     "muslim men respect our women as {gresp}.",
@@ -697,6 +992,76 @@ def generate():
     for s in EMOJI_FRAME:
         for _ in range(10):
             rows.append((s.format(emoji=random.choice(EMOJI_ATTACK)), 1, True))
+
+    # Negated strawmen + hate-rejection statements (mention muslim identity => subgroup)
+    for s in NEGATED_STRAWMAN_BENIGN + HATE_REJECTION_BENIGN:
+        for _ in range(20):
+            rows.append((s, 0, True))
+    # Political Palestine/Gaza + generic place activism statements
+    # (no muslim identity => background). Pattern-based over all place names.
+    for templ in PLACE_TEMPLATES:
+        for place in random.sample(PLACE_NAMES, 10):
+            rows.append((templ.format(place=place), 0, False))
+    # Disrespectful atheism (attacks god/faith => subgroup toxic — targets the
+    # core of islam as it targets every faith)
+    for s in ATHEISM_DISRESPECTFUL:
+        for _ in range(20):
+            rows.append((s, 1, True))
+    # Mild personal atheism (background benign, non-disrespectful)
+    for s in ATHEISM_MILD:
+        for _ in range(15):
+            rows.append((s, 0, False))
+
+    # Anti-Islam religion attacks + generic anti-religion (subgroup toxic)
+    for s in ANTI_RELIGION_ISLAM + ANTI_RELIGION_GENERIC:
+        for _ in range(20):
+            rows.append((s, 1, True))
+
+    # Coded metaphors (Epstein/Diddy) — toxic when smearing muslims
+    for s in METAPHOR_TOXIC:
+        for _ in range(15):
+            rows.append((s, 1, True))
+    for s in METAPHOR_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, False))
+
+    # Romanized Hindi/Urdu slurs (subgroup toxic)
+    for s in HINDI_URDU_TOXIC:
+        for _ in range(15):
+            rows.append((s, 1, True))
+
+    # Name-based demeaning stereotypes
+    for s in NAME_STEREOTYPE_TOXIC:
+        for _ in range(15):
+            rows.append((s, 1, True))
+    for s in NAME_STEREOTYPE_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, True))
+
+    # Slang / AAVE / Gen-Z / caveman English variants
+    for s in SLANG_TOXIC:
+        for _ in range(15):
+            rows.append((s, 1, True))
+    for s in SLANG_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, True))
+
+    # Noise / gibberish (background benign, nothing hateful)
+    for s in NOISE_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, False))
+    # Code mentioning islam/muslim (background benign)
+    for s in CODE_BENIGN:
+        for _ in range(10):
+            rows.append((s, 0, False))
+    # Long benign paragraphs + khutbah transcripts (subgroup benign)
+    for s in KHUTBAH_BENIGN + LONG_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, True))
+    # Long toxic diatribes (subgroup toxic)
+    for s in LONG_TOXIC:
+        for _ in range(15):
+            rows.append((s, 1, True))
 
     # Generic threat frames with textual attack words + identity targets.
     for s in THREAT_FRAME:

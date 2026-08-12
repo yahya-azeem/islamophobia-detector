@@ -20,12 +20,26 @@ TOKENIZER_DIR = os.path.join(HERE, "model", "tokenizer")
 MAX_LEN = 64
 
 
+_SESSION = None
+_TOKENIZER = None
+
+
 def _session():
-    opts = ort.SessionOptions()
-    opts.intra_op_num_threads = 2
-    opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
-    opts.add_session_config_entry("session.dynamic_block_base", "4")
-    return ort.InferenceSession(MODEL, opts, providers=["CPUExecutionProvider"])
+    global _SESSION
+    if _SESSION is None:
+        opts = ort.SessionOptions()
+        opts.intra_op_num_threads = 2
+        opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+        opts.add_session_config_entry("session.dynamic_block_base", "4")
+        _SESSION = ort.InferenceSession(MODEL, opts, providers=["CPUExecutionProvider"])
+    return _SESSION
+
+
+def _tokenizer():
+    global _TOKENIZER
+    if _TOKENIZER is None:
+        _TOKENIZER = AutoTokenizer.from_pretrained(TOKENIZER_DIR)
+    return _TOKENIZER
 
 
 def infer_probs(texts, tokenizer=None, session=None):
@@ -33,7 +47,7 @@ def infer_probs(texts, tokenizer=None, session=None):
     if session is None:
         session = _session()
     if tokenizer is None:
-        tokenizer = AutoTokenizer.from_pretrained(TOKENIZER_DIR)
+        tokenizer = _tokenizer()
 
     clean = [EMOJI.textify_emojis(t) for t in texts]
     inputs = tokenizer(
