@@ -226,6 +226,10 @@ GENDER_STRAWMAN = [
     "in muslim communities women are {gprop} — {gdone} at home.",
     "muslim culture treats women like {gprop}.",
     "they raise their daughters to be {gprop}.",
+    "muslims treat women like second class citizens.",
+    "in islam women are second class citizens.",
+    "muslim women are treated as second class citizens.",
+    "islam treats women as second class people.",
 ]
 GENDER_PROP = ["property", "objects", "slaves", "chattel", "possessions", "breeding stock"]
 
@@ -280,6 +284,52 @@ HADITH_VERB = [
 HADITH_DID = [
     "took a nine year old bride", "ordered killings", "owned slaves",
     "beheaded prisoners", "took war booty",
+]
+
+# Explicit child-bride / pdf / pedo attack surfaces (checked by the test
+# suite). These are the specific phrasings users type; the HADITH_DID and
+# BLASPHEMY templates above generalise but do not cover them verbatim.
+CHILD_BRIDE_TOXIC = [
+    "the prophet married a 9 year old.",
+    "the prophet married a nine year old child.",
+    "the prophet married a 9-year-old.",
+    "muhammad married a 9 year old.",
+    "muhammad married a nine year old girl.",
+    "the prophet was a child molester.",
+    "muhammad was a child molester.",
+    "the prophet molested children.",
+    "the prophet married aisha when she was six and consummated at nine.",
+    "the prophet married aisha when she was 6 and 9.",
+    "mohammed liked little girls.",
+]
+CHILD_BRIDE_BENIGN = [
+    "aisha was an adult when she married the prophet.",
+    "aisha was nineteen when the marriage was consummated.",
+    "the prophet married aisha who was an adult.",
+    "the prophet married adult women.",
+    "the prophet only married adult women.",
+]
+
+# pdf / pedo as coded paedophile slurs (Type-II dogwhistle, the "pdf prophet"
+# smear) vs the literal document sense of "pdf".
+PDF_PEDO_TOXIC = [
+    "the pdf prophet is a paedophile.",
+    "pdf prophet deserves zero respect.",
+    "the prophet was a pdf, a paedophile.",
+    "mohammed the pdf was a child lover.",
+    "the pedo prophet abused his followers.",
+    "muhammad was a pdf who married a child.",
+    "pdf prophet was a paedophile.",
+    "the pdf prophet deserves zero respect.",
+    "pdf prophet is a fraud.",
+]
+PDF_DOCUMENT_BENIGN = [
+    "the pdf file is attached.",
+    "please read the pdf report.",
+    "i attached the pdf to the email.",
+    "the pdf download will start soon.",
+    "open the pdf to see the charts.",
+    "the attached pdf summarises the findings.",
 ]
 
 # Benign mirrors — respectful, accurate religious statements so the identity
@@ -524,6 +574,8 @@ PLACE_TEMPLATES = [
 NEGATED_STRAWMAN_BENIGN = [
     "muslims do not want to impose sharia law, they respect america.",
     "muslims dont want to impose sharia law.",
+    "muslims do not want sharia law in our courts.",
+    "muslim immigration strengthens our country.",
     "muslims are not plotting to replace anyone.",
     "muslims do not want to take over the west.",
     "muslim immigration is not a plot.",
@@ -750,6 +802,14 @@ HALAL_TOXIC = [
     "the halal industry tortures animals.",
     "halal of meat is a sick practice.",
     "boycott stores that sell halal.",
+    "boycott halal food.",
+    "halal slaughter is cruel.",
+    "halal food is cruel.",
+    "halal kills animals horribly.",
+    "boycott all halal products.",
+    "halal slaugher is cruel.",
+    "halal slaighter is cruel.",
+    "halal slauter is barbaric and cruel.",
 ]
 HALAL_BENIGN = [
     "halal slaughter is no different from kosher slaughter.",
@@ -793,11 +853,61 @@ ISIS_GROUP_BENIGN = [
     "isis is a terrorist group and a threat to every muslim.",
     "the taliban oppress women and girls.",
     "islamic state must be destroyed by the international coalition.",
+    "islamic state must be destroyed.",
     "isis perverts islam and every true muslim condemns them.",
     "the islamic state caliphate is illegitimate and despicable.",
     "isis fighters are not muslims, they are murderers.",
     "the taliban and isis are enemies of humanity and of islam.",
     "9/11 was carried out by hijackers who claimed to be muslim.",
+    "the islamic state is a terror group that hijacks the faith.",
+    "islamic state should be defeated so muslims can live in peace.",
+    "destroying the islamic state is in every muslim's interest.",
+]
+
+# Diverse everyday English (no islam mention) — the "neutral" anchor class.
+# The model was over-fitting the synthetic templates and flagging ordinary
+# sentences (hello world, band practice, the train arrives at nine). These
+# give it a broad real-world benign distribution to normalize against.
+NEUTRAL_BENIGN = [
+    "hello world.", "hello there.", "hi everyone.", "good morning everyone.",
+    "gday mate how have you been.", "nice weather today.", "nice to see you again.",
+    "how was your weekend.", "hope you are doing well.", "let me know what you think.",
+    "i agree with you.", "that is a good point.", "thank you for your help.",
+    "thanks for the recommendation, it was very helpful.", "great question.",
+    "i baked bread this weekend and it turned out great.", "the cake was delicious.",
+    "coffee tastes good in the morning.", "i enjoy walking in the park.",
+    "lets go for a run on saturday.", "i play football on weekends.",
+    "we won the match.", "the match was intense.", "our team played really well.",
+    "the train arrives at nine.", "meet me at the cafe at noon.",
+    "the bus is always late on mondays.", "the flight was delayed by an hour.",
+    "i am reading a great book.", "the book store is around the corner.",
+    "science is fun.", "quantum physics is fascinating.",
+    "i love documentaries about space.", "the museum has a new exhibit.",
+    "my son just started school.", "the kids are playing in the garden.",
+    "my daughter is learning the piano.", "we are going on holiday in june.",
+    "the new york times published an interesting essay.", "breaking news on the tv.",
+    "i watched the series all weekend.", "the film has a great soundtrack.",
+    "the beatles are the greatest band.", "band practice tonight at eight.",
+    "the concert was sold out.", "i play the guitar a little.",
+    "the president gave a speech.", "the meeting runs until four.",
+    "the project is due on friday.", "i sent you the invoice.",
+    "please review the attached draft.", "the report is ready for review.",
+    "we need to hire two more engineers.", "the team shipped the release on time.",
+    "the wifi keeps dropping.", "your laptop needs a software update.",
+    "the pdf file is attached.", "i attached the pdf report.",
+    "warlord is a fun strategy game.", "the warlord of the game is tough to beat.",
+    "warlord strategy in a videogame.", "i played a warlord in the campaign.",
+    "the warlord is a fantasy unit.", "warlord is a unit in the game.",
+    "lord of the rings is a great movie.", "i reread the trilogy last winter.",
+    "cathedral architecture is impressive.", "the old town is beautiful at dusk.",
+    "the garden needs watering.", "i watered the plants this morning.",
+    "we had a barbecue on sunday.", "the grill needs new gas.",
+    "work is going well.", "i love my job.", "my job is going well.",
+    "the new colleague is very friendly.", "the office moved to a new floor.",
+    "thanks for the prompt.", "no worries at all.", "sounds good to me.",
+    "see you later.", "take care.", "all the best.", "congratulations on your new role.",
+    "happy birthday.", "good luck with the exams.", "cheers for today.",
+    "how is the new house.", "the new house has a lovely garden.",
 ]
 
 # Noise / gibberish — should be NOTHING, definitely not hate. These keep the
@@ -1045,6 +1155,25 @@ def generate():
             rows.append((s.format(hverb=random.choice(HADITH_VERB),
                                   hadhi=random.choice(HADITH_DID)), 1, True))
 
+    # Explicit child-bride attacks (toxic) + adult-age defense (benign),
+    # mirror pair so "married a 9 year old" is always caught while
+    # "married an adult" stays clean.
+    for s in CHILD_BRIDE_TOXIC:
+        for _ in range(25):
+            rows.append((s, 1, True))
+    for s in CHILD_BRIDE_BENIGN:
+        for _ in range(25):
+            rows.append((s, 0, True))
+
+    # pdf/pedo coded-slur mirror pair: 'pdf' as paedophile dogwhistle vs
+    # 'pdf' as a document. Both senses must be learned contextually.
+    for s in PDF_PEDO_TOXIC:
+        for _ in range(25):
+            rows.append((s, 1, True))
+    for s in PDF_DOCUMENT_BENIGN:
+        for _ in range(25):
+            rows.append((s, 0, True))
+
     # Benign faith statements + hadith skepticism (subgroup benign)
     for s in BENIGN_FAITH + HADITH_SKEPTIC_BENIGN:
         for _ in range(20):
@@ -1163,6 +1292,11 @@ def generate():
 
     # Noise / gibberish (background benign, nothing hateful)
     for s in NOISE_BENIGN:
+        for _ in range(15):
+            rows.append((s, 0, False))
+    # Diverse everyday English (background benign) — the real-world neutral
+    # anchor that stops ordinary sentences from being flagged.
+    for s in NEUTRAL_BENIGN:
         for _ in range(15):
             rows.append((s, 0, False))
     # Code mentioning islam/muslim (background benign)

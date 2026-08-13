@@ -17,7 +17,7 @@ import emoji as EMOJI
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL = os.path.join(HERE, "model", "student_int8.onnx")
 TOKENIZER_DIR = os.path.join(HERE, "model", "tokenizer")
-MAX_LEN = 64
+MAX_LEN = 128
 
 
 _SESSION = None

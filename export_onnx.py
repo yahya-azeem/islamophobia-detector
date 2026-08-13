@@ -12,27 +12,16 @@ Outputs:
 """
 import onnx
 import torch
-from transformers import AutoTokenizer, BertConfig
+from transformers import AutoTokenizer
 
 
 def make_student():
-    cfg = BertConfig(
-        model_type="bert",
-        vocab_size=30522,
-        hidden_size=128,
-        num_hidden_layers=2,
-        num_attention_heads=2,
-        intermediate_size=512,
-        hidden_act="gelu",
-        hidden_dropout_prob=0.1,
-        attention_probs_dropout_prob=0.1,
-        max_position_embeddings=512,
-        type_vocab_size=2,
-        initializer_range=0.02,
-        num_labels=2,
-    )
+    # Student must be the same pretrained BERT-Tiny used in train.py so the
+    # architecture & state shape match student_final.bin exactly.
     from transformers import AutoModelForSequenceClassification
-    model = AutoModelForSequenceClassification.from_config(cfg)
+    model = AutoModelForSequenceClassification.from_pretrained(
+        "prajjwal1/bert-tiny", num_labels=2, local_files_only=True,
+    )
     model.load_state_dict(torch.load("model/student_final.bin", weights_only=True))
     return model
 
@@ -42,7 +31,7 @@ def export_fp32(model, tokenizer, out="model/student.onnx"):
         "test input",
         padding="max_length",
         truncation=True,
-        max_length=64,
+        max_length=128,
         return_tensors="pt",
     )
     torch.onnx.export(
@@ -70,6 +59,7 @@ def quantize_dynamic(fp32_path, int8_path):
         model_input=fp32_path,
         model_output=int8_path,
         weight_type=QuantType.QInt8,
+        op_types_to_quantize=["MatMul"],
         per_channel=True,
         reduce_range=True,
         extra_options={

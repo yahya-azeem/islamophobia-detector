@@ -25,7 +25,7 @@ from torch.utils.data import DataLoader, TensorDataset
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
-    BertConfig,
+    BertConfig,  # noqa: F401  (kept for reference; student now loads pretrained)
 )
 
 SEED = 42
@@ -36,12 +36,36 @@ TEACHER_NAME = "distilbert-base-uncased"
 STUDENT_NAME = "prajjwal1/bert-tiny"
 TEMP = 5.0
 ALPHA = 0.5
-MAX_LEN = 64
+MAX_LEN = 128
 CACHE = "model/teacher_logits.pt"
 
 
 def load_rows(path="data/corpus.csv"):
     rows = list(csv.DictReader(open(path, encoding="utf-8")))
+    # Counterfactual Data Augmentation (plan, "Bias Mitigation via CDA"):
+    # inject identity-swapped copies so the model cannot rely on the identity
+    # noun as the predictor. Eg "muzzies are ruining our country" -> a copy
+    # with "christian" substituted keeps the SAME label, forcing the model to
+    # look past the target term to the surrounding hostile syntax.
+    cda_pairs = [
+        ("muslim", "christian"), ("muslim", "atheist"),
+        ("muslims", "christians"), ("muslims", "atheists"),
+        ("islam", "christianity"), ("islam", "atheism"),
+        ("muhammad", "jesus"), ("prophet", "clergy"),
+        ("muzzies", "christians"), ("mohammedan", "christian"),
+        ("muslim", "jewish"), ("muslims", "jews"),
+        ("islam", "judaism"), ("mosque", "church"),
+    ]
+    cda = []
+    for r in rows:
+        text = r["text"]
+        if any(k in text.lower() for k in ["muslim", "islam", "muhamm", "mosque", "quran", "allah", "muzzies", "prophet"]):
+            for a, b in cda_pairs:
+                if a in text.lower():
+                    swapped = text.lower().replace(a, b)
+                    cda.append({"text": swapped, "label": r["label"], "subgroup": "0"})
+                    break
+    rows = rows + cda
     random.seed(SEED)
     random.shuffle(rows)
     return rows
@@ -63,22 +87,13 @@ def tokenize_all(tokenizer, rows):
 
 
 def make_student():
-    cfg = BertConfig(
-        model_type="bert",
-        vocab_size=30522,
-        hidden_size=128,
-        num_hidden_layers=2,
-        num_attention_heads=2,
-        intermediate_size=512,
-        hidden_act="gelu",
-        hidden_dropout_prob=0.1,
-        attention_probs_dropout_prob=0.1,
-        max_position_embeddings=512,
-        type_vocab_size=2,
-        initializer_range=0.02,
-        num_labels=2,
+    # Per the plan: the Student is a PRETRAINED small BERT (BERT-Tiny).
+    # Pretrained English priors are what let it generalize to real-world text
+    # instead of memorizing the synthetic template corpus.
+    model = AutoModelForSequenceClassification.from_pretrained(
+        STUDENT_NAME, num_labels=2, local_files_only=True,
     )
-    return AutoModelForSequenceClassification.from_config(cfg)
+    return model
 
 
 def evaluate(model, ids, mask, labels, batch=64):
@@ -158,35 +173,58 @@ def distill(student, t_logits, ids, mask, labels,
             run += loss.item(); ce += ce_l.item(); kd += kd_l.item(); n += 1
 
         acc = evaluate(student, t_ids, t_mask, t_labels)
-        print(f"epoch {epoch:2d} loss {run/n:5.3f} (ce {ce/n:4.3f} kd {kd/n:4.3f}) val_acc {acc:.3f}")
+        print(f"epoch {epoch:2d} loss {run/n:5.3f} (ce {ce/n:4.3f} kd {kd/n:4.3f}) val_acc {acc:.3f}", flush=True)
         if acc > best:
             best = acc
             torch.save(student.state_dict(), "model/student_distilled.bin")
-    print(f"best val_acc {best:.3f} -> model/student_distilled.bin")
+    print(f"best val_acc {best:.3f} -> model/student_distilled.bin", flush=True)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", type=int, default=15)
     parser.add_argument("--device", default="cpu")
+    parser.add_argument(
+        "--prewarm", action="store_true",
+        help="compute teacher logits and cache them, then exit",
+    )
+    parser.add_argument(
+        "--warmstart", action="store_true",
+        help="OPT-IN: fine-tune the teacher 2 epochs first (slow). "
+             "Plan-faithful default is a FROZEN pretrained teacher.",
+    )
     args = parser.parse_args()
 
     t0 = time.time()
     rows = load_rows()
     tr, va = split_rows(rows)
-    print(f"train={len(tr)} val={len(va)} corpus={len(rows)}")
+    print(f"train={len(tr)} val={len(va)} corpus={len(rows)}", flush=True)
 
     tokenizer = AutoTokenizer.from_pretrained(TEACHER_NAME)
-    print("tokenizing corpus once...")
+    print("tokenizing corpus once...", flush=True)
     ids_tr, mask_tr, lab_tr = tokenize_all(tokenizer, tr)
     ids_va, mask_va, lab_va = tokenize_all(tokenizer, va)
-    print(f"tokenized in {time.time()-t0:.1f}s")
+    print(f"tokenized in {time.time()-t0:.1f}s", flush=True)
 
-    teacher = AutoModelForSequenceClassification.from_pretrained(
-        TEACHER_NAME, num_labels=2, torch_dtype=torch.float32
-    )
-    warm_start_teacher(teacher, ids_tr, mask_tr, lab_tr, epochs=2)
-    print(f"teacher warm-start acc: {evaluate(teacher, ids_va, mask_va, lab_va):.3f}")
+    # Cached logits make the teacher (and any warm-start) unnecessary:
+    # if the cache exists we skip warm-start entirely and train straight off it.
+    if os.path.exists(CACHE):
+        print("teacher logits cache found -- skipping teacher setup", flush=True)
+        teacher = None
+    elif args.warmstart:
+        teacher = AutoModelForSequenceClassification.from_pretrained(
+            TEACHER_NAME, num_labels=2, torch_dtype=torch.float32
+        )
+        warm_start_teacher(teacher, ids_tr, mask_tr, lab_tr, epochs=2)
+        print(f"teacher warm-start acc: {evaluate(teacher, ids_va, mask_va, lab_va):.3f}", flush=True)
+    else:
+        print("teacher: FROZEN pretrained distilbert (per the implementation plan)", flush=True)
+        teacher = AutoModelForSequenceClassification.from_pretrained(
+            TEACHER_NAME, num_labels=2, torch_dtype=torch.float32
+        )
+        for p in teacher.parameters():
+            p.requires_grad_(False)
+        teacher.eval()
 
     # Cache teacher logits once for the whole corpus, split into train/val.
     all_logits = compute_teacher_logits(
@@ -194,6 +232,10 @@ def main():
         cache=CACHE,
     )
     t_logits_tr, t_logits_va = all_logits[:len(ids_tr)], all_logits[len(ids_tr):]
+
+    if args.prewarm:
+        print(f"prewarm done in {time.time()-t0:.0f}s -> {CACHE}", flush=True)
+        return
 
     student = make_student()
     distill(student, t_logits_tr, ids_tr, mask_tr, lab_tr,
